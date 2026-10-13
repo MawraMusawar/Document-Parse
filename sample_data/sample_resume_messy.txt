@@ -1,0 +1,27 @@
+--- UNSTRUCTURED RESUME DRAFT ---
+Candidate: Sarah Connor (Reach me at: sarah.c.connor@cyberdyne.org or call 415-999-0192)
+Based in Austin, Texas. Online: github.com/sconnor, linkedin.com/in/sarah-connor
+
+Bio:
+Machine Learning specialist focused on LLM evaluations and reliable agentic workflows. About 3.5 years of industry experience.
+
+Skills I have:
+Python, PyTorch, HuggingFace, FastAPI, LangChain, LlamaIndex, Docker, Git. Also good at agile sprint leadership and cross-functional communication. Fluent in English and French.
+
+Work history:
+AI Research Engineer at Cyberdyne Systems (Remote)
+From 2022 to Present (Current position)
+Working on automated document parsing and model alignment pipelines. Created validation guardrails preventing bad JSON outputs. Tools: Python, Gemini, Pydantic, FastAPI.
+
+Junior Data Scientist at Apex Data Labs, Dallas, TX
+Start: June 2020, End: November 2021
+Built predictive classification models for customer churn. Cleaned tabular datasets and tuned scikit-learn models.
+
+Schooling:
+University of Texas at Austin
+BS Computer Engineering
+Completed in 2020. Honors: Magna Cum Laude
+
+Certifications:
+TensorFlow Developer Certificate by Google (2021)
+Deep Learning Specialization by Coursera (2020)

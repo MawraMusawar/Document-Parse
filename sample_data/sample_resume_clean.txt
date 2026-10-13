@@ -1,0 +1,36 @@
+Johnathan Doe
+Email: johnathan.doe@example.com | Phone: +1 (555) 234-5678
+Location: San Francisco, CA | LinkedIn: https://linkedin.com/in/johndoe | GitHub: https://github.com/johndoe
+
+PROFESSIONAL SUMMARY
+Senior Software Engineer with over 6 years of experience architecting distributed cloud systems, high-throughput microservices, and AI-enabled workflows.
+
+TECHNICAL SKILLS
+- Programming Languages: Python, Go, TypeScript, SQL
+- Frameworks & Libraries: FastAPI, Django, React, Pydantic, PyTorch
+- Cloud & DevOps: AWS (EC2, S3, Lambda), Docker, Kubernetes, Terraform, GitHub Actions
+- Databases: PostgreSQL, Redis, MongoDB
+- Languages: English (Fluent), Spanish (Conversational)
+
+WORK EXPERIENCE
+Senior Backend Engineer | CloudScale Inc. | San Francisco, CA
+March 2021 - Present
+- Designed and maintained high-performance microservices processing over 40M daily API requests with 99.99% uptime.
+- Led migration of legacy monolith to containerized FastAPI services on Kubernetes, reducing p99 latency by 35%.
+- Implemented real-time telemetry pipelines using Redis Streams and Prometheus.
+- Tech Stack: Python, FastAPI, Docker, Kubernetes, PostgreSQL, AWS
+
+Software Engineer | NextGen Analytics | San Jose, CA
+July 2018 - February 2021
+- Developed ETL pipelines ingesting 500GB+ telemetry data daily using Python and Apache Kafka.
+- Collaborated with frontend team to design clean RESTful and GraphQL APIs for client dashboards.
+- Tech Stack: Python, Django, Kafka, Redis, PostgreSQL
+
+EDUCATION
+University of California, Berkeley
+Bachelor of Science in Computer Science
+Graduated: 2018 | GPA: 3.8 / 4.0
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect - Associate | Amazon Web Services | 2022
+- Certified Kubernetes Administrator (CKA) | Linux Foundation | 2023
