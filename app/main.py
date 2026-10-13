@@ -3,7 +3,7 @@
 import json
 import os
 from typing import Any, Dict, List
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Body, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -80,60 +80,77 @@ def health_check() -> HealthCheckResponse:
 
 
 @app.post(
-    "/api/v1/parse-resume",
+    "/api/v1/parse-resume-text",
     tags=["Resume Extraction"],
     response_model=ResumeParseResponse,
-    summary="Parse Unstructured Resume",
+    summary="Parse Resume (Plain Text - Easy Copy/Paste)",
     description=(
-        "Extracts typed candidate data conforming to the ParsedResume schema. "
-        "Supports standard JSON ({'resume_text': '...'}) as well as raw text directly."
+        "Paste raw multi-line resume text directly into the text box below. "
+        "No JSON formatting, curly braces, or escaping required!"
     ),
 )
-async def parse_resume(request: Request) -> JSONResponse:
-    """Extract structured resume information from raw text or JSON body."""
+async def parse_resume_from_text(
+    resume_text: str = Body(
+        ...,
+        media_type="text/plain",
+        description="Paste raw candidate resume text directly here",
+        openapi_examples={
+            "Clean Sample Resume": {
+                "summary": "Standard Clean Resume",
+                "value": (
+                    "Johnathan Doe\n"
+                    "Email: johnathan.doe@example.com | Phone: +1 (555) 234-5678\n"
+                    "Location: San Francisco, CA | LinkedIn: https://linkedin.com/in/johndoe\n\n"
+                    "Senior Software Engineer with 6 years experience in Python, FastAPI, Docker, and AWS.\n"
+                    "Education: UC Berkeley, BS in Computer Science (2018)"
+                ),
+            }
+        },
+    )
+) -> JSONResponse:
+    """Parse raw plain text resume directly."""
     if not gemini_client.is_configured:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "Gemini API key is not configured. Please supply GEMINI_API_KEY in the server environment."
-            ),
+            detail="Gemini API key is not configured. Please supply GEMINI_API_KEY in .env.",
         )
 
-    # Read incoming request body
-    body_bytes = await request.body()
-    raw_content = body_bytes.decode("utf-8", errors="ignore").strip()
-
-    resume_text = ""
-    # Case 1: Try parsing as standard JSON
-    try:
-        parsed_json = json.loads(raw_content)
-        if isinstance(parsed_json, dict) and "resume_text" in parsed_json:
-            resume_text = str(parsed_json["resume_text"])
-        elif isinstance(parsed_json, str):
-            resume_text = parsed_json
-    except Exception:
-        # Case 2: User pasted raw plaintext directly into Swagger or request
-        resume_text = raw_content
-
-    if not resume_text or len(resume_text.strip()) < 20:
+    text = resume_text.strip()
+    if len(text) < 20:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Resume text is required and must contain at least 20 characters.",
+            detail="Resume text must contain at least 20 characters.",
         )
 
-    logger.info(f"Received resume parse request ({len(resume_text)} characters)")
-    result = agent.parse(resume_text)
+    logger.info(f"Received plain text resume parse request ({len(text)} characters)")
+    result = agent.parse(text)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if result.success else status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=result.model_dump(),
+    )
 
-    if result.success:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=result.model_dump(),
+
+@app.post(
+    "/api/v1/parse-resume",
+    tags=["Resume Extraction"],
+    response_model=ResumeParseResponse,
+    summary="Parse Resume (JSON Payload)",
+    description="Extracts structured resume data from a JSON payload containing `resume_text`.",
+)
+async def parse_resume_from_json(payload: ResumeParseRequest) -> JSONResponse:
+    """Parse resume provided via JSON body."""
+    if not gemini_client.is_configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Gemini API key is not configured. Please supply GEMINI_API_KEY in .env.",
         )
-    else:
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content=result.model_dump(),
-        )
+
+    logger.info(f"Received JSON resume parse request ({len(payload.resume_text)} characters)")
+    result = agent.parse(payload.resume_text)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if result.success else status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=result.model_dump(),
+    )
 
 
 @app.get(
