@@ -3,9 +3,9 @@
 import json
 import os
 from typing import Any, Dict, List
-from fastapi import Body, FastAPI, HTTPException, Request, status
+from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.config import get_settings
 from app.schemas.request import (
@@ -15,9 +15,11 @@ from app.schemas.request import (
 )
 from app.agent.gemini_client import GeminiClient
 from app.agent.retry_agent import ResumeStructuredAgent
+from app.utils.file_extractor import extract_text_from_file
 from app.utils.logger import FAILURE_LOG_PATH, logger
 
 settings = get_settings()
+STATIC_INDEX_PATH = os.path.join(os.path.dirname(__file__), "static", "index.html")
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -47,18 +49,19 @@ agent = ResumeStructuredAgent(gemini_client=gemini_client)
 @app.get(
     "/",
     tags=["Root"],
-    summary="Root Service Status",
-    response_description="Basic service introduction and interactive documentation link",
+    summary="Web UI & Service Status",
+    response_description="Interactive Web UI or Service Metadata",
 )
-def read_root() -> Dict[str, Any]:
-    """Root endpoint welcoming clients and directing to interactive Swagger documentation."""
+def read_root():
+    """Serves the interactive web interface, or JSON metadata if UI is absent."""
+    if os.path.exists(STATIC_INDEX_PATH):
+        return FileResponse(STATIC_INDEX_PATH, media_type="text/html")
     return {
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "status": "online",
         "documentation": "/docs",
         "health_check": "/health",
-        "tagline": "Make LLMs reliable, not random",
     }
 
 
@@ -76,6 +79,41 @@ def health_check() -> HealthCheckResponse:
         app_name=settings.APP_NAME,
         version=settings.APP_VERSION,
         gemini_configured=gemini_client.is_configured,
+    )
+
+
+@app.post(
+    "/api/v1/parse-resume-file",
+    tags=["Resume Extraction"],
+    response_model=ResumeParseResponse,
+    summary="Parse Resume Document (PDF, Word DOCX, TXT)",
+    description="Upload a candidate resume file (PDF, DOCX, or TXT) to extract structured JSON.",
+)
+async def parse_resume_from_file(file: UploadFile = File(...)) -> JSONResponse:
+    """Extract text from uploaded document and run structured parsing."""
+    if not gemini_client.is_configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Gemini API key is not configured. Please supply GEMINI_API_KEY in .env.",
+        )
+
+    content_bytes = await file.read()
+    try:
+        extracted_text = extract_text_from_file(content_bytes, file.filename or "resume.pdf")
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    if len(extracted_text) < 20:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The uploaded document does not contain sufficient text (minimum 20 characters).",
+        )
+
+    logger.info(f"Extracted {len(extracted_text)} characters from '{file.filename}'")
+    result = agent.parse(extracted_text)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if result.success else status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=result.model_dump(),
     )
 
 

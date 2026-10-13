@@ -7,13 +7,11 @@ client = TestClient(app)
 
 
 def test_root_endpoint():
-    """Verify that root endpoint returns HTTP 200 with service information."""
+    """Verify that root endpoint returns HTTP 200 with interactive web UI."""
     response = client.get("/")
     assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "online"
-    assert "/docs" in data["documentation"]
-    assert "Make LLMs reliable" in data["tagline"]
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "Resume Intelligence" in response.text
 
 
 def test_health_check_endpoint():
