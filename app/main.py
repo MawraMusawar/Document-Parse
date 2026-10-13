@@ -1,8 +1,9 @@
 """FastAPI application entrypoint for AI Resume Parser Structured Output Agent."""
 
+import json
 import os
 from typing import Any, Dict, List
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -85,11 +86,11 @@ def health_check() -> HealthCheckResponse:
     summary="Parse Unstructured Resume",
     description=(
         "Extracts typed candidate data conforming to the ParsedResume schema. "
-        "If schema validation fails, the engine automatically retries with specific error feedback."
+        "Supports standard JSON ({'resume_text': '...'}) as well as raw text directly."
     ),
 )
-def parse_resume(payload: ResumeParseRequest) -> JSONResponse:
-    """Extract structured resume information from raw text."""
+async def parse_resume(request: Request) -> JSONResponse:
+    """Extract structured resume information from raw text or JSON body."""
     if not gemini_client.is_configured:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -98,8 +99,30 @@ def parse_resume(payload: ResumeParseRequest) -> JSONResponse:
             ),
         )
 
-    logger.info(f"Received resume parse request ({len(payload.resume_text)} characters)")
-    result = agent.parse(payload.resume_text)
+    # Read incoming request body
+    body_bytes = await request.body()
+    raw_content = body_bytes.decode("utf-8", errors="ignore").strip()
+
+    resume_text = ""
+    # Case 1: Try parsing as standard JSON
+    try:
+        parsed_json = json.loads(raw_content)
+        if isinstance(parsed_json, dict) and "resume_text" in parsed_json:
+            resume_text = str(parsed_json["resume_text"])
+        elif isinstance(parsed_json, str):
+            resume_text = parsed_json
+    except Exception:
+        # Case 2: User pasted raw plaintext directly into Swagger or request
+        resume_text = raw_content
+
+    if not resume_text or len(resume_text.strip()) < 20:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Resume text is required and must contain at least 20 characters.",
+        )
+
+    logger.info(f"Received resume parse request ({len(resume_text)} characters)")
+    result = agent.parse(resume_text)
 
     if result.success:
         return JSONResponse(
