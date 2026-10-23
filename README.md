@@ -1,3 +1,12 @@
+---
+title: AI Resume Parser
+emoji: 📄
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # AI Resume Parser — Structured Output Agent
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
