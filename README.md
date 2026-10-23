@@ -6,195 +6,141 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Core Philosophy:** *"Make LLMs reliable, not random"*
-
-A production-grade AI microservice designed to transform messy, unstructured candidate resumes into strictly typed, schema-validated JSON. It features a built-in **Self-Healing Error Correction Loop** that intercepts Pydantic validation failures and prompts Gemini to fix exact discrepancies in real-time, backed by telemetry logging and an interactive FastAPI Swagger documentation.
+An AI microservice that converts messy, unstructured resumes into validated, structured JSON using Google Gemini. It includes a **Self-Healing Loop** — if the AI output fails validation, the errors are automatically fed back to fix it (up to 3 retries).
 
 ---
 
-## 📑 Table of Contents
-- [Architecture & Workflow](#-architecture--workflow)
-- [Key Features](#-key-features)
-- [Project Structure](#-project-structure)
-- [Local Installation & Setup](#-local-installation--setup)
-- [Running the Application](#-running-the-application)
-- [API Documentation](#-api-documentation)
-- [How to Deploy Live on Render (100% Free)](#-how-to-deploy-live-on-render-100-free)
-- [Running Tests](#-running-tests)
-- [Telemetry & Observability](#-telemetry--observability)
-
----
-
-## 🏛 Architecture & Workflow
+## How It Works
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor Client as Client / Recruiter Portal
-    participant API as FastAPI (/api/v1/parse-resume)
+    actor Client
+    participant API as FastAPI
     participant Agent as ResumeStructuredAgent
     participant Gemini as Google Gemini Flash
     participant Validator as PydanticValidator
-    participant Logger as Telemetry Logger
 
-    Client->>API: POST /api/v1/parse-resume (Raw Resume Text)
+    Client->>API: POST resume (text / file / JSON)
     API->>Agent: parse(resume_text)
 
     loop Self-Healing Loop (Up to 3 Retries)
-        Agent->>Gemini: generate(Prompt + Target Pydantic Schema)
-        Gemini-->>Agent: Candidate JSON String
-        Agent->>Validator: validate(Candidate JSON, ParsedResume)
+        Agent->>Gemini: Generate structured JSON
+        Gemini-->>Agent: JSON response
+        Agent->>Validator: Validate against Pydantic schema
 
-        alt Validation Passed
-            Validator-->>Agent: Validated ParsedResume Object
-            Agent->>API: ResumeParseResponse (200 OK)
-            API-->>Client: Structured Resume JSON
-        else Validation Failed
-            Validator-->>Agent: Pydantic ValidationError (Fields, Types)
-            Agent->>Logger: Record Failure Telemetry
-            Agent->>Agent: Generate Targeted Correction Feedback Prompt
+        alt ✅ Passed
+            Validator-->>Agent: Valid ParsedResume
+            Agent-->>Client: 200 OK — Structured JSON
+        else ❌ Failed
+            Validator-->>Agent: Validation errors
+            Agent->>Agent: Build correction prompt & retry
         end
     end
-
-    opt Retries Exhausted
-        Agent-->>API: ResumeParseResponse (422 Unprocessable Entity)
-        API-->>Client: Error Diagnostics & Failure Breakdown
-    end
 ```
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-1. **Strict Pydantic v2 Models:**
-   - Complete type safety over contact details (`EmailStr`), work history, educational milestones, and categorized skillsets.
-   - Enforces value constraints (e.g., non-negative years of experience, valid email patterns).
-
-2. **Google Gemini Flash Integration:**
-   - High throughput and low latency inference using the official `google-genai` SDK.
-   - Native JSON schema enforcement with low temperature for deterministic extractions.
-
-3. **Self-Healing Reflection Loop:**
-   - Zero-crash architecture: When output fails schema constraints, the validator constructs a precise error breakdown and re-queries the model with targeted instructions.
-
-4. **Failure Telemetry & Logging:**
-   - Structured JSON and rotating logs via `loguru` (`logs/validation_failures.log`).
-   - Dedicated API telemetry inspection endpoint at `/api/v1/telemetry/failures`.
-
-5. **Cloud-Ready for Render:**
-   - Pre-configured `render.yaml` blueprint for one-click deployment.
-   - Native support for dynamic port allocation (`PORT` env var) and health checks (`/health`).
+- **Strict Schema Validation** — Pydantic v2 models with `EmailStr`, type constraints, and required fields
+- **Google Gemini Flash** — Low-temperature JSON mode for deterministic extractions
+- **Self-Healing Retries** — Validation errors are fed back to the model for automatic correction
+- **Multiple Input Modes** — JSON body, plain text paste, or file upload (PDF, DOCX, TXT)
+- **Failure Telemetry** — Rotating logs via Loguru + API endpoint for inspection
+- **One-Click Deploy** — Pre-configured `render.yaml` for Render.com
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
-```text
+```
 Document-Parse/
 ├── app/
-│   ├── __init__.py
-│   ├── config.py              # Environment configuration & settings
-│   ├── main.py                # FastAPI endpoints, CORS, and lifespan
+│   ├── config.py              # Environment settings
+│   ├── main.py                # FastAPI endpoints
 │   ├── agent/
-│   │   ├── __init__.py
-│   │   ├── gemini_client.py   # Google Gemini API connector
-│   │   ├── validator.py       # Pydantic validation & error extractor
-│   │   └── retry_agent.py     # Self-healing feedback loop controller
+│   │   ├── gemini_client.py   # Gemini API wrapper
+│   │   ├── validator.py       # Pydantic validation & error extraction
+│   │   └── retry_agent.py     # Self-healing retry loop
 │   ├── schemas/
-│   │   ├── __init__.py
-│   │   ├── request.py         # Request & response payloads
-│   │   └── resume.py          # ParsedResume domain models
+│   │   ├── request.py         # Request & response models
+│   │   └── resume.py          # Resume data models
+│   ├── static/
+│   │   └── index.html         # Web UI
 │   └── utils/
-│       ├── __init__.py
-│       └── logger.py          # Loguru telemetry recorder
-├── sample_data/
-│   ├── sample_resume_clean.txt
-│   └── sample_resume_messy.txt
-├── tests/
-│   ├── __init__.py
-│   ├── test_api.py            # API endpoint integration tests
-│   └── test_schemas.py        # Schema validation unit tests
-├── .env.example               # Environment variables template
-├── .gitignore
-├── render.yaml                # Infrastructure-as-code for Render.com
-├── requirements.txt           # Production dependencies
-└── README.md                  # Project documentation
+│       ├── file_extractor.py  # PDF/DOCX/TXT text extraction
+│       └── logger.py          # Loguru telemetry
+├── sample_data/               # Sample resumes for testing
+├── tests/                     # pytest test suite
+├── .env.example               # Environment template
+├── render.yaml                # Render deployment config
+└── requirements.txt
 ```
 
 ---
 
-## 💻 Local Installation & Setup
+## Getting Started
 
 ### Prerequisites
-- Python 3.10 or higher
-- A free Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/)
+- Python 3.10+
+- A free [Google Gemini API Key](https://aistudio.google.com/)
 
-### 1. Clone the Repository
+### Setup
+
 ```bash
+# Clone & enter the project
 git clone https://github.com/MawraMusawar/Document-Parse.git
 cd Document-Parse
-```
 
-### 2. Create and Activate a Virtual Environment
-```bash
-# Windows
+# Create virtual environment
 python -m venv venv
-.\venv\Scripts\activate
+.\venv\Scripts\activate        # Windows
+# source venv/bin/activate     # macOS / Linux
 
-# macOS / Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure environment
+copy .env.example .env         # Windows
+# cp .env.example .env         # macOS / Linux
 ```
 
-### 4. Configure Environment Variables
-Copy the example environment template:
-```bash
-# Windows PowerShell
-Copy-Item .env.example .env
-
-# Linux / macOS
-cp .env.example .env
-```
-Open `.env` and insert your Gemini API Key:
+Open `.env` and add your API key:
 ```ini
-GEMINI_API_KEY=AIzaSy...your_actual_key_here
-GEMINI_MODEL_NAME=gemini-2.5-flash
-MAX_RETRY_ATTEMPTS=3
+GEMINI_API_KEY=your_key_here
 ```
 
----
+### Run
 
-## 🚀 Running the Application
-
-Start the local development server:
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-- **Interactive Swagger Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Alternative ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- **Health Check Endpoint:** [http://localhost:8000/health](http://localhost:8000/health)
+Open [http://localhost:8000/docs](http://localhost:8000/docs) for interactive API docs.
 
 ---
 
-## 📡 API Documentation
+## API Endpoints
 
-### 1. Parse Resume Endpoint
-- **URL:** `/api/v1/parse-resume`
-- **Method:** `POST`
-- **Request Body:**
-```json
-{
-  "resume_text": "John Doe\nEmail: john@example.com\nSenior Python Engineer with 5 years experience..."
-}
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Web UI |
+| `GET` | `/health` | Health check |
+| `POST` | `/api/v1/parse-resume` | Parse resume (JSON body) |
+| `POST` | `/api/v1/parse-resume-text` | Parse resume (plain text) |
+| `POST` | `/api/v1/parse-resume-file` | Parse resume (file upload: PDF, DOCX, TXT) |
+| `GET` | `/api/v1/telemetry/failures` | View validation failure logs |
+
+### Example Request
+
+```bash
+curl -X POST http://localhost:8000/api/v1/parse-resume \
+  -H "Content-Type: application/json" \
+  -d '{"resume_text": "John Doe\nEmail: john@example.com\nSenior Python Engineer with 5 years experience"}'
 ```
 
-- **Successful Response (200 OK):**
+### Example Response
+
 ```json
 {
   "success": true,
@@ -202,111 +148,39 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   "processing_time_ms": 1420.5,
   "data": {
     "summary": "Experienced Python Engineer specializing in cloud systems.",
-    "personal_info": {
-      "full_name": "John Doe",
-      "email": "john@example.com",
-      "phone": null,
-      "location": null,
-      "linkedin_url": null,
-      "github_url": null,
-      "portfolio_url": null
-    },
+    "personal_info": { "full_name": "John Doe", "email": "john@example.com" },
     "total_years_experience": 5.0,
-    "skills": {
-      "technical_skills": ["Python", "FastAPI", "PostgreSQL"],
-      "soft_skills": [],
-      "tools_and_platforms": ["Docker", "Git"],
-      "languages": ["English"]
-    },
+    "skills": { "technical_skills": ["Python", "FastAPI"], "soft_skills": [], "tools_and_platforms": [], "languages": [] },
     "work_experience": [],
     "education": [],
     "certifications": []
-  },
-  "validation_failures": null
+  }
 }
 ```
 
 ---
 
-## ☁️ How to Deploy Live on Render (100% Free)
+## Deploy on Render (Free)
 
-You can deploy this API on Render completely free in a few steps:
-
-### Step 1: Push Changes to GitHub
-Make sure all your project files are pushed to GitHub:
-```bash
-git add .
-git commit -m "feat: complete structured resume parser agent"
-git push origin main
-```
-
-### Step 2: Create a Web Service on Render
-1. Visit [Render.com](https://render.com) and sign in with your GitHub account.
-2. In the Render Dashboard, click **New +** and select **Web Service**.
-3. Select your repository: **`MawraMusawar/Document-Parse`**.
-
-### Step 3: Configure Service Details
-Fill in the deployment settings:
-- **Name:** `structured-resume-parser` (or any preferred name)
-- **Region:** Any (e.g., Oregon or Frankfurt)
-- **Branch:** `main`
-- **Runtime:** `Python 3`
-- **Build Command:**
-  ```bash
-  pip install -r requirements.txt
-  ```
-- **Start Command:**
-  ```bash
-  uvicorn app.main:app --host 0.0.0.0 --port $PORT
-  ```
-- **Instance Type:** `Free`
-
-### Step 4: Add Environment Variable
-Scroll down to the **Environment Variables** section and add:
-- **Key:** `GEMINI_API_KEY`
-- **Value:** `your_gemini_api_key_from_google_ai_studio`
-
-*(Optional)* You can also configure:
-- `GEMINI_MODEL_NAME` = `gemini-2.5-flash`
-- `MAX_RETRY_ATTEMPTS` = `3`
-
-### Step 5: Deploy & Test Live
-1. Click **Deploy Web Service**.
-2. Within 2-3 minutes, Render will build and launch your application.
-3. Access your live API interactive documentation at:
-   👉 **`https://your-service-name.onrender.com/docs`**
+1. Push your code to GitHub
+2. Go to [Render.com](https://render.com) → **New +** → **Web Service**
+3. Connect your repo and configure:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Instance Type:** Free
+4. Add environment variable: `GEMINI_API_KEY` = `your_key`
+5. Click **Deploy** — live in ~2 minutes at `https://your-app.onrender.com/docs`
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
-Execute the comprehensive unit and integration test suite:
 ```bash
 pytest -v
 ```
 
-Output:
-```text
-tests/test_api.py::test_root_endpoint PASSED
-tests/test_api.py::test_health_check_endpoint PASSED
-tests/test_api.py::test_telemetry_failures_endpoint PASSED
-tests/test_api.py::test_parse_resume_missing_api_key PASSED
-tests/test_schemas.py::test_personal_info_valid PASSED
-tests/test_schemas.py::test_personal_info_invalid_email PASSED
-tests/test_schemas.py::test_negative_experience_rejected PASSED
-tests/test_validator_cleans_markdown_fences PASSED
-tests/test_validator_catches_syntax_errors PASSED
-```
-
 ---
 
-## 📊 Telemetry & Observability
+## License
 
-- Real-time failures are logged into `logs/validation_failures.log`.
-- To inspect failure statistics and recent validation traps directly via API, query:
-  `GET /api/v1/telemetry/failures?limit=20`
-
----
-
-## 📄 License
-This project is licensed under the MIT License.
+MIT License
