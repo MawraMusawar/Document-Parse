@@ -44,6 +44,21 @@ Certifications:
 """
 
 
+# Hugging Face ZeroGPU compatibility
+try:
+    import spaces
+except ImportError:
+    class spaces:
+        @staticmethod
+        def GPU(fn=None, *args, **kwargs):
+            if fn is not None:
+                return fn
+            def wrapper(f):
+                return f
+            return wrapper
+
+
+@spaces.GPU
 def parse_resume(
     file_obj: Any,
     raw_text: str,
