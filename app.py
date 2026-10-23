@@ -103,7 +103,7 @@ def load_sample_text() -> str:
 
 
 # Build Gradio UI
-with gr.Blocks(title="AI Resume Parser", theme=gr.themes.Soft(primary_hue="blue")) as demo:
+with gr.Blocks(title="AI Resume Parser") as demo:
     gr.Markdown(
         """
         # 📄 AI Resume Parser — Structured Output Agent
