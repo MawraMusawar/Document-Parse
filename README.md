@@ -7,6 +7,7 @@ sdk: gradio
 app_file: app.py
 pinned: false
 license: mit
+suggested_hardware: cpu-basic
 ---
 
 # AI Resume Parser — Structured Output Agent
