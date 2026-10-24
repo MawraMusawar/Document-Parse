@@ -19,25 +19,3 @@ jobs:
         run: |
           git push --force https://Mawra:$HF_TOKEN@huggingface.co/spaces/Mawra/document-parse main
 
-      - name: Ensure Free CPU Basic Hardware
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python -m pip install --upgrade huggingface_hub
-          python -c "
-          import os
-          from huggingface_hub import HfApi
-          token = os.environ.get('HF_TOKEN')
-          if token:
-              api = HfApi(token=token)
-              try:
-                  api.request_space_hardware(repo_id='Mawra/document-parse', hardware='cpu-basic')
-                  print('Successfully requested cpu-basic hardware for Mawra/document-parse')
-              except Exception as e:
-                  print('Hardware request response:', e)
-              try:
-                  api.restart_space(repo_id='Mawra/document-parse')
-                  print('Successfully restarted space Mawra/document-parse')
-              except Exception as e:
-                  print('Restart space response:', e)
-          "
