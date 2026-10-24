@@ -171,19 +171,6 @@ curl -X POST http://localhost:8000/api/v1/parse-resume \
 
 ---
 
-## Deploy on Render (Free)
-
-1. Push your code to GitHub
-2. Go to [Render.com](https://render.com) → **New +** → **Web Service**
-3. Connect your repo and configure:
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Instance Type:** Free
-4. Add environment variable: `GEMINI_API_KEY` = `your_key`
-5. Click **Deploy** — live in ~2 minutes at `https://your-app.onrender.com/docs`
-
----
-
 ## Running Tests
 
 ```bash
