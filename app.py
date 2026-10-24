@@ -70,13 +70,17 @@ except ImportError:
 CUSTOM_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root {
+/* Force light color scheme */
+:root, html, body, .gradio-container, .dark {
+  color-scheme: light !important;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
   --bg-page: #f8fafc !important;
   --bg-surface: #ffffff !important;
   --border-color: #e2e8f0 !important;
-  --text-main: #0f172a !important;
-  --text-muted: #64748b !important;
+  --body-text-color: #0f172a !important;
+  --block-label-text-color: #0f172a !important;
+  --block-title-text-color: #0f172a !important;
+  --body-text-color-subdued: #475569 !important;
 }
 
 body, .gradio-container {
@@ -87,86 +91,130 @@ body, .gradio-container {
   margin: 0 auto !important;
 }
 
+.dark, .dark * {
+  color-scheme: light !important;
+}
+
 .gradio-container {
   padding: 16px 24px !important;
 }
 
 /* Header Banner */
 .custom-header {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px 24px;
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 16px 24px !important;
+  margin-bottom: 24px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
 .brand-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
-  background: #0f172a;
-  color: #ffffff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+  width: 36px !important;
+  height: 36px !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
 }
 
 .brand-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em !important;
 }
 
 .brand-desc {
-  font-size: 0.78rem;
-  color: #64748b;
+  font-size: 0.78rem !important;
+  color: #475569 !important;
 }
 
 .badge-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .pill-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
 }
 
 .pill-green {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #059669;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #047857 !important;
 }
 
 .pill-blue {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1d4ed8 !important;
 }
 
 .dot-green {
-  width: 6px;
-  height: 6px;
-  background: #059669;
-  border-radius: 50%;
+  width: 6px !important;
+  height: 6px !important;
+  background: #047857 !important;
+  border-radius: 50% !important;
+}
+
+/* Tabs: High Contrast */
+.tabs > div, .tab-nav {
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: transparent !important;
+}
+
+button[role="tab"], .tab-nav button, .tabs > div > button {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  opacity: 1 !important;
+}
+
+button[role="tab"].selected, .tab-nav button.selected, .tabs > div > button.selected {
+  color: #0f172a !important;
+  border-bottom: 2.5px solid #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Dropzone & Labels */
+label span, .block-title, .block-label {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  font-size: 0.84rem !important;
+}
+
+.file-preview-holder, .drop-file, .upload-container, .upload-container * {
+  color: #334155 !important;
+}
+
+/* Accordion */
+.accordion, .label-wrap, .label-wrap span, button.accordion-header {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
 }
 
 /* Gradio Card Overrides */
@@ -184,7 +232,8 @@ button.primary-btn, button.primary {
   border-radius: 8px !important;
   font-weight: 600 !important;
   border: none !important;
-  padding: 10px 18px !important;
+  padding: 12px 18px !important;
+  font-size: 0.92rem !important;
   transition: all 0.15s ease !important;
 }
 
@@ -192,117 +241,139 @@ button.primary-btn:hover, button.primary:hover {
   background: #1e293b !important;
 }
 
+/* Secondary Button */
+button.secondary {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 0.78rem !important;
+}
+
+button.secondary:hover {
+  background: #f1f5f9 !important;
+}
+
 /* Visual Profile Elements */
 .placeholder-view {
-  background: #ffffff;
-  border: 1.5px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 60px 24px;
-  text-align: center;
-  color: #64748b;
+  background: #ffffff !important;
+  border: 1.5px dashed #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 60px 24px !important;
+  text-align: center !important;
+  color: #475569 !important;
+}
+
+.placeholder-view h3 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.placeholder-view p {
+  color: #64748b !important;
 }
 
 .metrics-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  background: #f1f5f9;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  background: #f1f5f9 !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  margin-bottom: 20px !important;
 }
 
 .m-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
 }
 
 .m-title {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 0.7rem !important;
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
 }
 
 .m-value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
 }
 
 .profile-container {
-  background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  background: #ffffff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
 }
 
 .c-name {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em !important;
 }
 
 .c-summary {
-  font-size: 0.86rem;
-  color: #475569;
-  line-height: 1.55;
+  font-size: 0.86rem !important;
+  color: #334155 !important;
+  line-height: 1.55 !important;
 }
 
 .chips-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
 }
 
 .contact-chip {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 0.78rem;
-  color: #334155;
-  text-decoration: none;
-  font-weight: 500;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 0.78rem !important;
+  color: #1e293b !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
 }
 
 .sec-heading {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: #94a3b8;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 6px;
-  margin-top: 6px;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding-bottom: 6px !important;
+  margin-top: 6px !important;
 }
 
 .skill-tag {
-  display: inline-block;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #0f172a;
-  border-radius: 6px;
-  padding: 3px 9px;
-  font-size: 0.76rem;
-  font-weight: 500;
-  margin: 2px 4px 2px 0;
+  display: inline-block !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  border-radius: 6px !important;
+  padding: 3px 9px !important;
+  font-size: 0.76rem !important;
+  font-weight: 500 !important;
+  margin: 2px 4px 2px 0 !important;
 }
 
 .skill-tag-blue {
-  background: #eff6ff;
-  border-color: #dbeafe;
-  color: #1e40af;
+  background: #eff6ff !important;
+  border-color: #dbeafe !important;
+  color: #1e40af !important;
 }
 
 .timeline-item {
-  border-left: 2px solid #e2e8f0;
-  padding-left: 14px;
-  margin-left: 4px;
-  margin-bottom: 14px;
-  position: relative;
+  border-left: 2px solid #cbd5e1 !important;
+  padding-left: 14px !important;
+  margin-left: 4px !important;
+  margin-bottom: 14px !important;
+  position: relative !important;
 }
 
 .timeline-item::before {
@@ -317,65 +388,65 @@ button.primary-btn:hover, button.primary:hover {
 }
 
 .t-role {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
 }
 
 .t-company {
-  font-size: 0.78rem;
-  color: #64748b;
-  margin-bottom: 4px;
+  font-size: 0.78rem !important;
+  color: #475569 !important;
+  margin-bottom: 4px !important;
 }
 
 .t-bullets {
-  padding-left: 16px;
-  font-size: 0.8rem;
-  color: #334155;
-  line-height: 1.45;
-  margin: 0;
+  padding-left: 16px !important;
+  font-size: 0.8rem !important;
+  color: #334155 !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
 }
 
 .edu-row {
-  margin-bottom: 8px;
+  margin-bottom: 8px !important;
 }
 
 .e-degree {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
 }
 
 .e-inst {
-  font-size: 0.78rem;
-  color: #64748b;
+  font-size: 0.78rem !important;
+  color: #475569 !important;
 }
 
 .cert-pill {
-  display: inline-block;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #047857;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin: 3px 4px 3px 0;
+  display: inline-block !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #047857 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  margin: 3px 4px 3px 0 !important;
 }
 """
 
 HEADER_HTML = """
-<div class="custom-header">
-  <div class="brand-group">
-    <div class="brand-icon">📄</div>
+<div class="custom-header" style="background:#ffffff !important; border:1px solid #e2e8f0; border-radius:12px; padding:16px 24px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+  <div class="brand-group" style="display:flex; align-items:center; gap:12px;">
+    <div class="brand-icon" style="width:36px; height:36px; background:#0f172a; color:#ffffff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px;">📄</div>
     <div>
-      <div class="brand-name">Resume Parser — Structured Output Agent</div>
-      <div class="brand-desc">Converts messy resumes into validated JSON using Google Gemini</div>
+      <div class="brand-name" style="font-size:1.05rem; font-weight:700; color:#0f172a !important; letter-spacing:-0.01em;">Resume Parser — Structured Output Agent</div>
+      <div class="brand-desc" style="font-size:0.78rem; color:#475569 !important;">Converts messy resumes into validated JSON using Google Gemini</div>
     </div>
   </div>
-  <div class="badge-group">
-    <div class="pill-badge pill-blue">⚡ Powered by Gemini 2.5</div>
-    <div class="pill-badge pill-green"><span class="dot-green"></span> Self-Healing Loop Active</div>
+  <div class="badge-group" style="display:flex; align-items:center; gap:10px;">
+    <div class="pill-badge pill-blue" style="background:#eff6ff !important; border:1px solid #bfdbfe; color:#1d4ed8 !important; padding:5px 12px; border-radius:999px; font-size:0.75rem; font-weight:600;">⚡ Powered by Gemini 2.5</div>
+    <div class="pill-badge pill-green" style="background:#ecfdf5 !important; border:1px solid #a7f3d0; color:#047857 !important; padding:5px 12px; border-radius:999px; font-size:0.75rem; font-weight:600;"><span class="dot-green" style="display:inline-block; width:6px; height:6px; background:#047857; border-radius:50%; margin-right:4px;"></span> Self-Healing Loop Active</div>
   </div>
 </div>
 """
@@ -587,8 +658,9 @@ def set_sample_resume():
 
 # Build Sleek Gradio Interface
 theme = gr.themes.Default(font=gr.themes.GoogleFont("Inter"))
+FORCE_LIGHT_JS = "() => { document.documentElement.classList.remove('dark'); document.body.classList.remove('dark'); }"
 
-with gr.Blocks(title="AI Resume Parser") as demo:
+with gr.Blocks(title="AI Resume Parser", js=FORCE_LIGHT_JS) as demo:
     gr.HTML(HEADER_HTML)
 
     with gr.Row(equal_height=False):
@@ -628,7 +700,8 @@ with gr.Blocks(title="AI Resume Parser") as demo:
 
 if __name__ == "__main__":
     try:
-        demo.launch(server_name="0.0.0.0", server_port=7860, css=CUSTOM_CSS, theme=theme)
+        demo.launch(server_name="0.0.0.0", server_port=7860, css=CUSTOM_CSS, theme=theme, js=FORCE_LIGHT_JS)
     except TypeError:
         demo.launch(server_name="0.0.0.0", server_port=7860)
+
 
