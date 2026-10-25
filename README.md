@@ -17,7 +17,7 @@ license: mit
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An AI microservice that converts messy, unstructured resumes into validated, structured JSON using Google Gemini. It includes a **Self-Healing Loop** — if the AI output fails validation, the errors are automatically fed back to fix it (up to 3 retries).
+An AI microservice that converts messy, unstructured resumes into validated, structured JSON using Google Gemini. It includes a **Self-Healing Loop** — if the AI output fails validation, the errors are automatically fed back to fix it.
 
 ---
 
